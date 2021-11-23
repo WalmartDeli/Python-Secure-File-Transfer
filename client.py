@@ -1,9 +1,12 @@
 import socket                   # Socket Programming support
 import os
+import struct
 
 SERVER_ADDRESS = "0.0.0.0"      # Address of server we want to connect to
 SERVER_PORT = 1234              # Port of the server we want to connect to
 PATH = os.getcwd()              # Use the programs current directory as the working path
+BUFFER_SIZE = 4096              # Size of socket message buffer
+SEPARATOR = b"<SEPARATOR>"      # Separator for message
 
 server = socket.socket()                            # Create TCP socket
 server.connect((SERVER_ADDRESS, SERVER_PORT))       # User created socket to connection to the target server
@@ -36,21 +39,24 @@ def ldir():
 
 #List files in remote directory
 def rdir():
-    print("rdir")
+    sendMsg("rdir".encode())
+    dir = recvMsg().decode()
+    print(dir, end="")
     return
 
 #upload file to remote server from directory
 def upload():
-    print("up")
+    sendMsg("up".encode())
     return
 
 #download file to remote server from directory
 def download():
-    print("down")
+    sendMsg("down".encode())
     return
 
 #gracefully exit client program.
 def disconnect():
+    sendMsg("quit".encode())
     print("\nDisconnecting")
     quit()
 
@@ -62,6 +68,33 @@ def initializeClient():
 #Client side of DH Key-Exchange. Returns session key as int.
 def keyExchange():
     pass
+
+#Send message to client. Requires bytes.
+def sendMsg(msg):
+    # Prefix each message with a 4-byte length (network byte order)
+    msg = struct.pack('>I', len(msg)) + msg
+    server.sendall(msg)
+
+#Receive Message from client.
+def recvMsg():
+    # Read message length and unpack it into an integer
+    raw_msglen = recvall(4)
+    if not raw_msglen:
+        return None
+    msglen = struct.unpack('>I', raw_msglen)[0]
+    # Read the message data
+    return recvall(msglen)
+
+def recvall(n):
+    # Helper function to recv n bytes or return None if EOF is hit
+    data = bytearray()
+    while len(data) < n:
+        packet = server.recv(n - len(data))
+        if not packet:
+            return None
+        data.extend(packet)
+    return data
+
 
 # Input Loop
 KEY = initializeClient()
