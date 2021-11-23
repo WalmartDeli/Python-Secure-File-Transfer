@@ -5,15 +5,19 @@ School Project using Python Sockets and Personal Encryption Method.
 ## Installation
 Must have python3 installed on your system.
 
-tqdm lets us use cool loading bars for file transfer.
-You can install tqdm and install and clone the project repository as follows.
+Clone the repository to your preferred directory.
 ```
-pip3 install tqdm
 git clone https://github.com/WalmartDeli/Python-Secure-File-Transfer.git
 ```
 
 ## Execution
 Run the server program first.
-`python3 server.py`
-Then run up to four client programs at a time.
-`python3 client.py`
+```
+python3 server.py
+```
+Then run up to four client programs at a time in different folders preferably.
+```
+python3 client.py
+```
+
+Type 'help' in the client interface to see the full list of commands.
