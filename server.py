@@ -6,7 +6,6 @@ import struct                   # Byte packing support
 HOST_ADDRESS = "0.0.0.0"    # Servers address (0.0.0.0 for generic access)
 HOST_PORT = 1234            # Servers port (Used in client scripts for connection to server)
 PATH = os.getcwd()          # Working directory of server
-BUFFER_SIZE = 4096          # Size of socket message buffer
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)      # TCP socket creation
 server.bind((HOST_ADDRESS, HOST_PORT))                          # Bind the socket to our chosen address and port
@@ -35,15 +34,42 @@ def removeClient(target_client, address):
         connected_clients.remove(target_client)
 
 #Receive uploaded file from client
-def receiveFile():
-    pass
+def receiveFile(connection):
+    filename = recvMsg(connection).decode()
+    print("Received Filename: " + filename)
+
+    filePerms = recvMsg(connection).decode()
+    print("Received file perms: " + oct(int(filePerms)))
+    filePerms = int(filePerms, base=8)
+
+    file = recvMsg(connection)
+    print("Received File")
+
+    with open(filename, "wb") as writer:
+        writer.write(file)
+        os.chmod(filename, filePerms)
+        print("Wrote file ", filename)    
+    
+
+
+
 
 #Send file to client for download.
-def sendFile():
-    pass
+def sendFile(connection, filename):
+    if os.path.exists(filename):
+        with open(filename, "rb") as reader:
+            file = reader.read()
+            filePerms = oct(os.stat(filename).st_mode)[-3:]     #Get file permissions
+
+            #Build Message
+            sendMsg(filePerms.encode(), connection)                         #file perms
+            sendMsg(file, connection)                                       #Actual file already in bytes.
+    else:
+        error = b"File [" + filename.encode() + b"] Does not Exist!"
+        sendMsg(error, connection)
 
 #Send client list of files on server.
-def sendDir(connection, address):
+def sendDir(connection):
     l_files = os.listdir(PATH) #gets content of folder
     dir = "FTP Server Directory:" + "\n"
 
@@ -102,13 +128,13 @@ def clientConnection(connection, address):
         #Run Requested Command
         cmdlst = message.split(" ") #splits commands into arg array
         if cmdlst[0] == "rdir":
-            sendDir(connection, address)
+            sendDir(connection)
         elif cmdlst[0] == "up":
-            receiveFile()
+            receiveFile(connection)
         elif cmdlst[0] == "down":
-            sendFile()
+            sendFile(connection, cmdlst[1])
         elif cmdlst[0] == "quit":
-            removeClient()
+            removeClient(connection, address)
             break
 
 #Accept New Clients

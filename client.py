@@ -5,8 +5,6 @@ import struct
 SERVER_ADDRESS = "0.0.0.0"      # Address of server we want to connect to
 SERVER_PORT = 1234              # Port of the server we want to connect to
 PATH = os.getcwd()              # Use the programs current directory as the working path
-BUFFER_SIZE = 4096              # Size of socket message buffer
-SEPARATOR = b"<SEPARATOR>"      # Separator for message
 
 server = socket.socket()                            # Create TCP socket
 server.connect((SERVER_ADDRESS, SERVER_PORT))       # User created socket to connection to the target server
@@ -45,13 +43,41 @@ def rdir():
     return
 
 #upload file to remote server from directory
-def upload():
-    sendMsg("up".encode())
+def upload(filename):
+    if os.path.exists(filename):
+        sendMsg("up".encode())
+        with open(filename, "rb") as reader:
+            file = reader.read()
+
+            filePerms = oct(os.stat(filename).st_mode)[-3:]     #Get file permissions
+
+            #Build Message
+            sendMsg(filename.encode())                          #name of file
+            sendMsg(filePerms.encode())                         #file perms
+            sendMsg(file)                                       #Actual file already in bytes.
+    else:
+        error = "File [" + filename + "] Does not Exist!"
+        print(error)
+
+        
     return
 
 #download file to remote server from directory
-def download():
-    sendMsg("down".encode())
+def download(filename):
+    message = "down " + filename
+    sendMsg(message.encode())
+    filePerms = recvMsg().decode()
+    if len(filePerms) == 3:
+        filePerms = int(filePerms, base=8)
+        file = recvMsg()
+
+        with open(filename, "wb") as writer:
+            writer.write(file)
+            os.chmod(filename, filePerms)
+            print("Wrote file ", filename)   
+    else:
+        print(filePerms)
+
     return
 
 #gracefully exit client program.
@@ -114,9 +140,9 @@ while True:
     elif cmdlst[0] == "rdir":
         rdir()
     elif cmdlst[0] == "up":
-        upload()
+        upload(cmdlst[1])
     elif cmdlst[0] == "down":
-        download()
+        download(cmdlst[1])
     elif cmdlst[0] == "quit":
         disconnect()
     else:
