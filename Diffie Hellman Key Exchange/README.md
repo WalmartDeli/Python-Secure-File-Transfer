@@ -15,4 +15,4 @@ Bob computes s = A^b mod p
 s = 4^3 mod 23 = 18  
 Alice and Bob now share a secret (the number 18).  
 
-**Note: Run only the client.py code   
+*Note: Run only the client.py code*  
