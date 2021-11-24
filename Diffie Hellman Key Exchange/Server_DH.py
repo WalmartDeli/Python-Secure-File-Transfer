@@ -16,7 +16,7 @@ B = g**b % p
 
 ################Exchange alice public key################
 
-from client import *
+from Client_DH import *
 
 # Bob computes the shared secret, which is A^b (from his point of view)
 shared_secret_Bobs_POV = A**b % p
