@@ -1,6 +1,6 @@
 # Diffie Hellman client side
 import random
-from server import *
+from Server_DH import *
 
 # D.H. parameters
 g = 2           #primitive root
