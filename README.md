@@ -11,11 +11,13 @@ git clone https://github.com/WalmartDeli/Python-Secure-File-Transfer.git
 ```
 
 ## Execution
-Run the server program first.
+Run the server program located in ./server
 ```
 python3 server.py
 ```
 Then run up to four client programs at a time in different folders preferably.
+One has already been created in ./client
+(Just copy client folder for more clients)
 ```
 python3 client.py
 ```
