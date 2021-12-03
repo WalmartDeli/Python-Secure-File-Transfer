@@ -4,6 +4,10 @@ School Project using Python Sockets and Personal Encryption Method.
 
 ## Installation
 Must have python3 installed on your system.
+Make sure the cryptography module is upgraded to the latest version:
+```
+sudo pip3 install cryptography --upgrade
+```
 
 Clone the repository to your preferred directory.
 ```
